@@ -10,7 +10,7 @@ body { font-family:'Arial',sans-serif; background: linear-gradient(135deg,#667ee
 .stars { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
 .star { position:absolute; width:2px; height:2px; background:white; border-radius:50%; animation:twinkle 3s infinite; }
 @keyframes twinkle { 0%,100%{opacity:0.3}50%{opacity:1} }
-.container { width:100%; height:100vh; position:relative; z-index:1; }
+.container { width:100%; height:100vh; position:relative; z-index:1; overflow:hidden; }
 .wish-card { position:absolute; background:rgba(255,255,255,0.95); padding:15px 20px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); max-width:250px; word-wrap:break-word; cursor:pointer; transition: transform 0.3s; backdrop-filter: blur(8px); font-size:14px; }
 .wish-card:hover { transform: scale(1.05) rotate(3deg); }
 .wish-card::before { content:'🎈'; position:absolute; top:-12px; right:-8px; font-size:26px; animation:bounce 2s infinite; }
@@ -108,18 +108,22 @@ function createWishCard(data){
     container.appendChild(card);
 }
 
-// Плавная бесконечная анимация без резких скачков
+// Плавная бесконечная анимация внутри границ экрана
 function animateCard(card) {
-    const startX = Math.random() * (window.innerWidth - 250);
-    const startY = Math.random() * (window.innerHeight - 200);
-    const amplitudeX = 50 + Math.random()*50;  // колебания по X
-    const amplitudeY = 20 + Math.random()*30;  // колебания по Y
-    const speed = 0.0008 + Math.random()*0.0012; // скорость
-    const rotationAmplitude = 5 + Math.random()*5; // вращение
+    const cardWidth = card.offsetWidth;
+    const cardHeight = card.offsetHeight;
+
+    // Начальные позиции в пределах окна
+    const startX = Math.random() * (window.innerWidth - cardWidth);
+    const startY = Math.random() * (window.innerHeight - cardHeight);
+    const amplitudeX = 20 + Math.random()*40;  // колебания по X
+    const amplitudeY = 10 + Math.random()*20;  // колебания по Y
+    const speed = 0.0003 + Math.random()*0.0003; // медленная скорость
+    const rotationAmplitude = 3 + Math.random()*4; // небольшое вращение
 
     function animate(time) {
-        const x = startX + Math.sin(time * speed) * amplitudeX;
-        const y = startY + Math.cos(time * speed) * amplitudeY;
+        const x = Math.min(Math.max(startX + Math.sin(time * speed) * amplitudeX, 0), window.innerWidth - cardWidth);
+        const y = Math.min(Math.max(startY + Math.cos(time * speed) * amplitudeY, 0), window.innerHeight - cardHeight);
         const rotate = Math.sin(time * speed) * rotationAmplitude;
 
         card.style.left = x + "px";
