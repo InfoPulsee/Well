@@ -5,28 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Стена сообщений</title>
 <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Arial', sans-serif; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); min-height:100vh; overflow:hidden; position:relative; color:#333; }
-    .stars { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
-    .star { position:absolute; width:2px; height:2px; background:white; border-radius:50%; animation:twinkle 3s infinite; }
-    @keyframes twinkle { 0%,100%{opacity:0.3}50%{opacity:1} }
-    .container { width:100%; height:100vh; position:relative; z-index:1; }
-    .wish-card { position:absolute; background:rgba(255,255,255,0.95); padding:15px 20px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); max-width:250px; word-wrap:break-word; animation:float 20s infinite linear; cursor:pointer; transition: transform 0.3s; backdrop-filter: blur(8px); font-size:14px; }
-    .wish-card:hover { transform: scale(1.05) rotate(3deg); }
-    .wish-card::before { content:'🎈'; position:absolute; top:-12px; right:-8px; font-size:26px; animation:bounce 2s infinite; }
-    @keyframes bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)} }
-    .wish-text { font-size:14px; color:#333; line-height:1.4; margin-bottom:6px; }
-    .wish-author { font-size:11px; color:#666; text-align:right; font-style:italic; }
-    .input-container { position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,0.15); backdrop-filter: blur(20px); padding:15px 25px; border-top:2px solid rgba(255,255,255,0.3); z-index:1000; }
-    .input-wrapper { max-width:800px; margin:0 auto; display:flex; gap:12px; flex-wrap:wrap; }
-    input, textarea { flex:1; min-width:180px; padding:12px; border:none; border-radius:15px; font-size:14px; background:rgba(255,255,255,0.9); color:#333; outline:none; transition: all 0.3s; }
-    textarea { min-height:50px; resize:none; flex-basis:100%; }
-    input:focus, textarea:focus { background:white; box-shadow:0 5px 15px rgba(0,0,0,0.2); }
-    button { padding:12px 36px; background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%); color:white; border:none; border-radius:15px; font-size:14px; font-weight:bold; cursor:pointer; text-transform:uppercase; transition:all 0.3s; }
-    button:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(245,87,108,0.4); }
-    button:active { transform:translateY(0); }
-    .title { position:fixed; top:25px; left:50%; transform:translateX(-50%); color:white; font-size:36px; font-weight:bold; text-shadow:2px 2px 8px rgba(0,0,0,0.3); z-index:100; text-align:center; }
-    @media(max-width:768px){.title{font-size:28px;top:15px}.input-wrapper{flex-direction:column}input,textarea{min-width:100%}}
+/* Тут остаётся весь твой стиль из предыдущего кода */
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Arial',sans-serif; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); min-height:100vh; overflow:hidden; color:#333; }
+.stars { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+.star { position:absolute; width:2px; height:2px; background:white; border-radius:50%; animation:twinkle 3s infinite; }
+@keyframes twinkle { 0%,100%{opacity:0.3}50%{opacity:1} }
+.container { width:100%; height:100vh; position:relative; z-index:1; }
+.wish-card { position:absolute; background:rgba(255,255,255,0.95); padding:15px 20px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); max-width:250px; word-wrap:break-word; cursor:pointer; transition: transform 0.3s; backdrop-filter: blur(8px); font-size:14px; }
+.wish-card:hover { transform: scale(1.05) rotate(3deg); }
+.wish-card::before { content:'🎈'; position:absolute; top:-12px; right:-8px; font-size:26px; animation:bounce 2s infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)} }
+.wish-text { font-size:14px; color:#333; line-height:1.4; margin-bottom:6px; }
+.wish-author { font-size:11px; color:#666; text-align:right; font-style:italic; }
+.input-container { position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,0.15); backdrop-filter: blur(20px); padding:15px 25px; border-top:2px solid rgba(255,255,255,0.3); z-index:1000; }
+.input-wrapper { max-width:800px; margin:0 auto; display:flex; gap:12px; flex-wrap:wrap; }
+input, textarea { flex:1; min-width:180px; padding:12px; border:none; border-radius:15px; font-size:14px; background:rgba(255,255,255,0.9); color:#333; outline:none; transition: all 0.3s; }
+textarea { min-height:50px; resize:none; flex-basis:100%; }
+input:focus, textarea:focus { background:white; box-shadow:0 5px 15px rgba(0,0,0,0.2); }
+button { padding:12px 36px; background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%); color:white; border:none; border-radius:15px; font-size:14px; font-weight:bold; cursor:pointer; text-transform:uppercase; transition:all 0.3s; }
+button:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(245,87,108,0.4); }
+button:active { transform:translateY(0); }
+.title { position:fixed; top:25px; left:50%; transform:translateX(-50%); color:white; font-size:36px; font-weight:bold; text-shadow:2px 2px 8px rgba(0,0,0,0.3); z-index:100; text-align:center; }
+@media(max-width:768px){.title{font-size:28px;top:15px}.input-wrapper{flex-direction:column}input,textarea{min-width:100%}}
 </style>
 </head>
 <body>
@@ -43,11 +44,14 @@
     </div>
 </div>
 
+<!-- Подключаем библиотеку bad-words через CDN -->
 <script type="module">
+import Filter from "https://cdn.skypack.dev/bad-words";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Firebase конфиг
+const filter = new Filter();
+
 const firebaseConfig = {
   apiKey: "AIzaSyC_iRQRECuIMxVbcZxSqAOfVaR4EasniSQ",
   authDomain: "well-67432.firebaseapp.com",
@@ -56,7 +60,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Звёзды
+// Звёзды на фоне
 const starsContainer = document.getElementById('stars');
 for(let i=0;i<100;i++){
     const star=document.createElement('div');
@@ -67,11 +71,10 @@ for(let i=0;i<100;i++){
     starsContainer.appendChild(star);
 }
 
-// Контейнер для сообщений
 const container=document.getElementById('wishContainer');
 const emojis=['🎈','🎊','🎁','🎉','🎂','🌟','✨','💝','🎀','🌈'];
 
-// Получаем сообщения из Firebase и показываем как карточки
+// Получаем сообщения из Firebase
 const q=query(collection(db,"messages"), orderBy("timestamp"));
 onSnapshot(q, snapshot=>{
     container.innerHTML="";
@@ -80,7 +83,6 @@ onSnapshot(q, snapshot=>{
     });
 });
 
-// Отправка
 const sendBtn=document.getElementById('sendBtn');
 const wishInput=document.getElementById('wishInput');
 const nameInput=document.getElementById('nameInput');
@@ -91,8 +93,10 @@ wishInput.addEventListener('keydown', e=>{
 });
 
 async function send(){
-    const text=wishInput.value.trim();
+    let text = wishInput.value.trim();
     if(!text) return;
+    // Фильтруем сообщение
+    text = filter.clean(text);
     await addDoc(collection(db,"messages"),{
         text,
         author: nameInput.value.trim() || 'Аноним',
@@ -102,41 +106,36 @@ async function send(){
     nameInput.value='';
 }
 
-// Создаём карточку с анимацией
+// Создаём карточку
 function createWishCard(data){
     const card=document.createElement('div');
     card.className='wish-card';
     card.innerHTML=`<div class="wish-text">${data.text}</div><div class="wish-author">— ${data.author}</div>`;
-    
-    // Начальная позиция
-    card.style.left=Math.random()*(window.innerWidth-250)+'px';
-    card.style.top=Math.random()*(window.innerHeight-200)+'px';
-    
-    // Анимация движения
-    const duration=10+Math.random()*10;
-    const startX=parseFloat(card.style.left);
-    const startY=parseFloat(card.style.top);
-    const endX=Math.random()*(window.innerWidth-250);
-    const endY=Math.random()*(window.innerHeight-200);
-    animateCard(card,startX,startY,endX,endY,duration);
-
+    animateCard(card);
     container.appendChild(card);
 }
 
-// Анимация движения
-function animateCard(card,startX,startY,endX,endY,duration){
-    let startTime=null;
-    function animate(currentTime){
-        if(!startTime) startTime=currentTime;
-        const elapsed=currentTime-startTime;
-        const progress=(elapsed/(duration*1000))%1;
-        const currentX=startX+(endX-startX)*progress;
-        const currentY=startY+(endY-startY)*progress + Math.sin(progress*Math.PI*4)*30;
-        card.style.left=currentX+'px';
-        card.style.top=currentY+'px';
-        card.style.transform=`rotate(${Math.sin(progress*Math.PI*2)*10}deg)`;
+// Плавная бесконечная анимация без резких скачков
+function animateCard(card) {
+    const startX = Math.random() * (window.innerWidth - 250);
+    const startY = Math.random() * (window.innerHeight - 200);
+    const amplitudeX = 50 + Math.random()*50;
+    const amplitudeY = 20 + Math.random()*30;
+    const speed = 0.0008 + Math.random()*0.0012;
+    const rotationAmplitude = 5 + Math.random()*5;
+
+    function animate(time) {
+        const x = startX + Math.sin(time * speed) * amplitudeX;
+        const y = startY + Math.cos(time * speed) * amplitudeY;
+        const rotate = Math.sin(time * speed) * rotationAmplitude;
+
+        card.style.left = x + "px";
+        card.style.top = y + "px";
+        card.style.transform = `rotate(${rotate}deg)`;
+
         requestAnimationFrame(animate);
     }
+
     requestAnimationFrame(animate);
 }
 </script>
