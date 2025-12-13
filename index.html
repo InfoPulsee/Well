@@ -62,3 +62,198 @@ body {
   left:0;
   right:0;
   top:0;          /* 👈 теперь включает зону заголовка */
+  overflow:hidden;
+}
+
+.wish-card {
+  position:absolute;
+  width:250px;
+  padding:16px 18px 14px;
+  background:rgba(255,255,255,.95);
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+  font-size:14px;
+}
+
+.wish-emoji {
+  position:absolute;
+  top:-14px;
+  right:-10px;
+  font-size:26px;
+  animation:bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+
+.wish-text {
+  line-height:1.4;
+  margin-bottom:6px;
+}
+
+.wish-author {
+  font-size:11px;
+  color:#555;
+  text-align:right;
+  font-style:italic;
+}
+
+.input-container {
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:16px 24px;
+  backdrop-filter:blur(20px);
+  background:rgba(255,255,255,.15);
+  border-top:1px solid rgba(255,255,255,.3);
+  z-index:20;
+}
+
+.input-wrapper {
+  max-width:800px;
+  margin:0 auto;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+input, textarea {
+  flex:1;
+  padding:12px;
+  border:none;
+  border-radius:14px;
+  font-size:14px;
+}
+
+textarea {
+  flex-basis:100%;
+  resize:none;
+}
+
+button {
+  padding:12px 34px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#f093fb,#f5576c);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="title">📝 Стена сообщений</div>
+
+<div class="container">
+  <div class="flight-zone" id="flightZone"></div>
+</div>
+
+<div class="input-container" id="inputBar">
+  <div class="input-wrapper">
+    <input id="nameInput" placeholder="Ваше имя">
+    <textarea id="wishInput" placeholder="Напишите сообщение..." maxlength="200"></textarea>
+    <button id="sendBtn">Отправить</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyC_iRQRECuIMxVbcZxSqAOfVaR4EasniSQ",
+  authDomain: "well-67432.firebaseapp.com",
+  projectId: "well-67432"
+});
+
+const db = getFirestore(app);
+
+// ⭐ фон
+const stars = document.getElementById("stars");
+for(let i=0;i<100;i++){
+  const s=document.createElement("div");
+  s.className="star";
+  s.style.left=Math.random()*100+"%";
+  s.style.top=Math.random()*100+"%";
+  s.style.animationDelay=Math.random()*3+"s";
+  stars.appendChild(s);
+}
+
+const zone = document.getElementById("flightZone");
+const inputBar = document.getElementById("inputBar");
+
+function updateZone() {
+  const bottom = inputBar.offsetHeight + 20;
+  zone.style.bottom = bottom + "px";
+}
+
+updateZone();
+window.addEventListener("resize", updateZone);
+
+// эмодзи
+const emojis = ['🎈','🎉','✨','🌟','🎁','💝','🎂','🎊','🌈','💫'];
+
+// Firebase
+const q = query(collection(db,"messages"), orderBy("timestamp"));
+onSnapshot(q,snap=>{
+  zone.innerHTML="";
+  snap.forEach(d=>createCard(d.data()));
+});
+
+function createCard(data){
+  const card=document.createElement("div");
+  card.className="wish-card";
+
+  const emoji = emojis[Math.floor(Math.random()*emojis.length)];
+
+  card.innerHTML=`
+    <div class="wish-emoji">${emoji}</div>
+    <div class="wish-text">${data.text}</div>
+    <div class="wish-author">— ${data.author||"Аноним"}</div>
+  `;
+
+  zone.appendChild(card);
+  animate(card);
+}
+
+function animate(card){
+  const rect = zone.getBoundingClientRect();
+  const w = card.offsetWidth;
+  const h = card.offsetHeight;
+
+  const baseX = Math.random()*(rect.width-w);
+  const baseY = Math.random()*(rect.height-h);
+
+  const ax = 15 + Math.random()*20;
+  const ay = 8 + Math.random()*12;
+  const speed = 0.00025 + Math.random()*0.00015;
+
+  function frame(t){
+    const x = baseX + Math.sin(t*speed)*ax;
+    const y = baseY + Math.cos(t*speed)*ay;
+    card.style.transform = `translate(${x}px,${y}px)`;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+// отправка
+sendBtn.onclick = async ()=>{
+  const text = wishInput.value.trim();
+  if(!text) return;
+  await addDoc(collection(db,"messages"),{
+    text,
+    author: nameInput.value.trim(),
+    timestamp:new Date()
+  });
+  wishInput.value="";
+  nameInput.value="";
+};
+</script>
+</body>
+</html>
