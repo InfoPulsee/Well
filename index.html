@@ -11,8 +11,8 @@ body { font-family:'Arial',sans-serif; background: linear-gradient(135deg,#667ee
 .star { position:absolute; width:2px; height:2px; background:white; border-radius:50%; animation:twinkle 3s infinite; }
 @keyframes twinkle { 0%,100%{opacity:0.3}50%{opacity:1} }
 .container { width:100%; height:100vh; position:relative; z-index:1; overflow:hidden; }
-.wish-card { position:absolute; background:rgba(255,255,255,0.95); padding:15px 20px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); max-width:250px; word-wrap:break-word; cursor:pointer; transition: transform 0.3s; backdrop-filter: blur(8px); font-size:14px; }
-.wish-card:hover { transform: scale(1.05) rotate(3deg); }
+.wish-card { position:absolute; background:rgba(255,255,255,0.95); padding:15px 20px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); width:250px; height:auto; max-width:250px; word-wrap:break-word; cursor:pointer; transition: transform 0.3s; backdrop-filter: blur(8px); font-size:14px; }
+.wish-card:hover { transform: scale(1) rotate(0deg); } /* фиксируем масштаб и поворот */
 .wish-card::before { content:'🎈'; position:absolute; top:-12px; right:-8px; font-size:26px; animation:bounce 2s infinite; }
 @keyframes bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)} }
 .wish-text { font-size:14px; color:#333; line-height:1.4; margin-bottom:6px; }
@@ -108,23 +108,32 @@ function createWishCard(data){
     container.appendChild(card);
 }
 
-// Плавная бесконечная анимация внутри границ экрана
+// Анимация сообщений с ограничением по экрану и фиксированным размером
 function animateCard(card) {
     const cardWidth = card.offsetWidth;
     const cardHeight = card.offsetHeight;
 
-    // Начальные позиции в пределах окна
-    const startX = Math.random() * (window.innerWidth - cardWidth);
-    const startY = Math.random() * (window.innerHeight - cardHeight);
-    const amplitudeX = 20 + Math.random()*40;  // колебания по X
-    const amplitudeY = 10 + Math.random()*20;  // колебания по Y
-    const speed = 0.0003 + Math.random()*0.0003; // медленная скорость
-    const rotationAmplitude = 3 + Math.random()*4; // небольшое вращение
+    const maxX = window.innerWidth - cardWidth;
+    const maxY = window.innerHeight - cardHeight;
+
+    // Начальные позиции
+    const startX = Math.random() * maxX;
+    const startY = Math.random() * maxY;
+
+    const amplitudeX = 20 + Math.random()*30;
+    const amplitudeY = 10 + Math.random()*15;
+    const speed = 0.0003 + Math.random()*0.0002; 
+    const rotationAmplitude = 2 + Math.random()*3;
 
     function animate(time) {
-        const x = Math.min(Math.max(startX + Math.sin(time * speed) * amplitudeX, 0), window.innerWidth - cardWidth);
-        const y = Math.min(Math.max(startY + Math.cos(time * speed) * amplitudeY, 0), window.innerHeight - cardHeight);
-        const rotate = Math.sin(time * speed) * rotationAmplitude;
+        let x = startX + Math.sin(time*speed) * amplitudeX;
+        let y = startY + Math.cos(time*speed) * amplitudeY;
+
+        // Ограничиваем границы
+        x = Math.min(Math.max(x, 0), maxX);
+        y = Math.min(Math.max(y, 0), maxY);
+
+        const rotate = Math.sin(time*speed) * rotationAmplitude;
 
         card.style.left = x + "px";
         card.style.top = y + "px";
