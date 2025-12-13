@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Стена сообщений</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  background: radial-gradient(circle at top, #1c1c1c, #0b0b0b);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #f2f2f2;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  padding: 18px;
+  text-align: center;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.wall-container {
+  flex: 1;
+  padding: 25px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wall-container::-webkit-scrollbar {
+  width: 6px;
+}
+.wall-container::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 10px;
+}
+
+.message {
+  max-width: 80%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #1f1f1f, #141414);
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+  animation: fadeUp 0.35s ease;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+
+.message:nth-child(odd) {
+  align-self: flex-start;
+  border-left: 3px solid #4caf50;
+}
+
+.message:nth-child(even) {
+  align-self: flex-end;
+  border-right: 3px solid #3fa9f5;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.input-area {
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid #2a2a2a;
+}
+
+#text {
+  flex: 1;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #333;
+  background: #141414;
+  color: white;
+  font-size: 15px;
+}
+
+#text::placeholder {
+  color: #777;
+}
+
+#text:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+#sendBtn {
+  padding: 0 26px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #4caf50, #43a047);
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+#sendBtn:hover {
+  box-shadow: 0 6px 18px rgba(76,175,80,0.4);
+}
+
+#sendBtn:active {
+  transform: scale(0.96);
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>🧱 Стена писем</h2>
+</div>
+
+<div class="wall-container" id="wall"></div>
+
+<div class="input-area">
+  <input id="text" placeholder="Оставь здесь своё послание…" maxlength="500">
+  <button id="sendBtn">Отправить</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC_iRQRECuIMxVbcZxSqAOfVaR4EasniSQ",
+  authDomain: "well-67432.firebaseapp.com",
+  projectId: "well-67432",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const wall = document.getElementById("wall");
+const input = document.getElementById("text");
+const button = document.getElementById("sendBtn");
+
+const q = query(
+  collection(db, "messages"),
+  orderBy("timestamp")
+);
+
+onSnapshot(q, snapshot => {
+  wall.innerHTML = "";
+  snapshot.forEach(doc => {
+    const div = document.createElement("div");
+    div.className = "message";
+    div.textContent = doc.data().text;
+    wall.appendChild(div);
+  });
+  wall.scrollTop = wall.scrollHeight;
+});
+
+button.addEventListener("click", send);
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") send();
+});
+
+async function send() {
+  if (!input.value.trim()) return;
+  await addDoc(collection(db, "messages"), {
+    text: input.value.trim(),
+    timestamp: new Date()
+  });
+  input.value = "";
+}
+</script>
+
+</body>
+</html>
