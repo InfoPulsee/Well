@@ -155,6 +155,7 @@ button {
   width: 100px;
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/bad-words@3.0.4/lib/badwords.min.js"></script>
 </head>
 <body>
 <div class="logo">
@@ -256,17 +257,95 @@ function animate(card){
   requestAnimationFrame(frame);
 }
 
-// отправка
-sendBtn.onclick = async ()=>{
+// ======================= Фильтр матерных слов =======================
+
+// список русских матерных слов
+const russianBadWords = [
+  "сука","блять","хуй","пизда","ебать","ёб","мудак","гандон","залуп","нахуй",
+  "шлюха","путана","проститутка","шалава","блядь","блядина","блядоёбина","выблядок",
+  "выблядина","мудачка","дура","дурочка","тупая","тупорылая","хуеёвая","коза","крыса",
+  "пидораска","хуесос","хуесоска","хуесосы","вагина","залупа","член","пенис","жопа",
+  "мразь","плутовка","спермоглот","спермоглотка","спермоглоты","тварь","гнида","машенка",
+  "секс","ебля","интим","трахать","трахатся","ебатся","ебаться","трахаться","свинота",
+  "ебучая","корова","шваль","ублюдина","бля","пздц","пиздец","идиотка","идиот","хер",
+  "заебись","ахуела","ахуеть","ахуй","охуела","охуеть","охуй","жирная","сволочь","анус",
+  "влагалище","пиздюк","пиздючка","залупёнок","ебанатка","ебанат","еблан","ебанат",
+  "долбоёбка","долбоеёб",
+  
+  // новые слова
+  "ебло","ебланка","мудачок","ебанашка","пиздюкля","пиздюлина","блядюшка","шлюшонок",
+  "сучка","долбаёб","тупица","тупоголовый","говно","гавно","говнюк","говняшка","срака",
+  "попка","жопёнок","дрочила","дрочун","дрочунья","мудакло","мудила","падла","падлюка",
+  "падлюшка","жопастая","жопастик","свинья","свинюшка","свинюшонок","порнуха","порнушка",
+  "дрянь","дерьмо","дрист","дрисня","дристун","дристуха","охуительный","охуительная",
+  "заебал","заебала","ебучник","ебучина","ебанец","пиздецкий","пиздюга","залупенок",
+  "мудакёнок","мудачина","ебнутый","дрочила","дрочун","дрочунья","дристунчик","сволочька",
+  "тварюшка","гнидушка","пиздюкчик","залупчик","пиздецулька","ебанатик","ебланчик",
+  "шалавашка","шлюшечка","мудачишка","хуевый","хуевенький","хуёвый","охуевший","заёбистый",
+
+  // английские аналоги (транслитом)
+  "suka","blyat","huy","pizda","ebat","yob","mudak","gandon","zalup","nahuy",
+  "shluha","putana","prostitutka","shalava","blyad","blyadina","blyadoyobina","vyblyadok",
+  "vyblyadina","mudachka","dura","durochka","tupaya","tuporylaya","hueevaya","koza","krysa",
+  "pidoraska","huesos","huesoska","huesosy","vagina","zalupa","chlen","penis","zhopa",
+  "mraz","plutovka","spermoglot","spermoglotka","spermogloty","tvar","gnida","mashenka",
+  "seks","eblya","intim","trahat","trahatsya","ebatsya","ebatsya","trahatsya","svinota",
+  "ebuchaya","korova","shval","ublyudina","blya","pzdc","pizdec","idiotka","idiot","kher",
+  "zaebis","ahuela","ahuet","ahuy","ohuela","ohuet","ohuy","zhirnaya","svoloch","anus",
+  "vlagalische","pizdyuk","pizdyuchka","zalupyonek","ebanatka","ebanat","eblan","ebanat",
+  "dolboyebka","dolboyob",
+
+  "eblo","eblanka","mudachok","ebanashka","pizdyuklya","pizdyulina","blyadyushka","shlyushonok",
+  "suchka","dolboyeb","tupitsa","tupogolovy","govno","gavno","govnyuk","govnyashka","sraka",
+  "popka","zhopyonok","drochila","drochun","drochunya","mudaklo","mudila","padla","padlyuka",
+  "padlyushka","zhopastaya","zhopastik","svinya","svinyushka","svinyushonok","pornuha","pornushka",
+  "dryan","dermo","drist","drisnya","dristun","dristukha","ohuytelny","ohuytelnaya",
+  "zaebal","zaebala","ebuchnik","ebuchina","ebanets","pizdecky","pizdyuga","zalupenok",
+  "mudakyonok","mudachina","ebnuty","drochila","drochun","drochunya","dristunchik","svolochka",
+  "tvaryushka","gnidushka","pizdyukchik","zalupchik","pizdetsulka","ebanatik","eblanchik",
+  "shalavashka","shlyushechka","mudachishka","huevy","huevenky","huevy","ohuevshiy","zaebisty"
+];
+
+// функция нормализации текста для фильтра
+function normalizeText(text) {
+  let normalized = text.toLowerCase();
+
+  // убираем все пробелы и спецсимволы
+  normalized = normalized.replace(/\s+/g, "").replace(/[^a-zа-яё]/gi, "");
+
+  // замена латинских букв на кириллицу (чтобы ловить "бlять", "пizдa")
+  const map = { "a":"а", "e":"е", "i":"и", "o":"о", "u":"у", "y":"у", "l":"л" };
+  normalized = normalized.split("").map(ch => map[ch] || ch).join("");
+
+  return normalized;
+}
+
+// функция проверки текста на мат
+function containsBadWords(text) {
+  const normalized = normalizeText(text);
+  return russianBadWords.some(word => normalized.includes(word));
+}
+
+// отправка сообщений
+sendBtn.onclick = async () => {
   const text = wishInput.value.trim();
   if(!text) return;
-  await addDoc(collection(db,"messages"),{
+
+  const author = nameInput.value.trim();
+
+  if (containsBadWords(text) || containsBadWords(author)) {
+    alert("Сообщение содержит запрещённые слова и не может быть отправлено.");
+    return;
+  }
+
+  await addDoc(collection(db, "messages"), {
     text,
-    author: nameInput.value.trim(),
-    timestamp:new Date()
+    author: author || "Аноним",
+    timestamp: new Date()
   });
-  wishInput.value="";
-  nameInput.value="";
+
+  wishInput.value = "";
+  nameInput.value = "";
 };
 </script>
 </body>
