@@ -42,11 +42,12 @@ body {
   left:50%;
   transform:translateX(-50%);
   color:white;
-  font-size:34px;
+  font-size:12px;
   font-weight:bold;
   z-index:10;
   text-shadow:2px 2px 8px rgba(0,0,0,.3);
   pointer-events:none;
+  
 }
 
 .container {
@@ -67,25 +68,25 @@ body {
 
 .wish-card {
   position:absolute;
-  width:250px;
-  padding:16px 18px 14px;
+  max-width:250px;
+  padding:8px 10px 6px;
   background:rgba(255,255,255,.95);
-  border-radius:18px;
+  border-radius:10px;
   box-shadow:0 10px 30px rgba(0,0,0,.3);
-  font-size:14px;
+  font-size: 10px;
 }
 
 .wish-emoji {
   position:absolute;
-  top:-14px;
+  top:-7px;
   right:-10px;
-  font-size:26px;
+  font-size:16px;
   animation:bounce 2s infinite;
 }
 
 @keyframes bounce {
   0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-6px)}
+  50%{transform:translateY(-4px)}
 }
 
 .wish-text {
@@ -135,6 +136,7 @@ textarea {
 
 button {
   padding:12px 34px;
+  width: 100%;
   border:none;
   border-radius:14px;
   background:linear-gradient(135deg,#f093fb,#f5576c);
@@ -142,12 +144,24 @@ button {
   font-weight:bold;
   cursor:pointer;
 }
+
+.logo {
+  position: absolute;
+  top:-30px;
+  left: -20px;
+  z-index: 1000;
+}
+.logo-img{
+  width: 100px;
+}
 </style>
 </head>
 <body>
-
+<div class="logo">
+  <img class="logo-img" src="./Logo-NEX">
+</div>
 <div class="stars" id="stars"></div>
-<div class="title">📝 Стена сообщений</div>
+<div class="title">Поздравения для тебя!!!</div>
 
 <div class="container">
   <div class="flight-zone" id="flightZone"></div>
