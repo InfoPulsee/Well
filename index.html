@@ -10,59 +10,33 @@
 
 body {
   font-family: Arial, sans-serif;
-  background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  background: linear-gradient(135deg,#667eea,#764ba2);
   height:100vh;
   overflow:hidden;
 }
 
-.stars {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:0;
-}
-
+.stars { position:fixed; inset:0; pointer-events:none; z-index:0; }
 .star {
   position:absolute;
-  width:2px;
-  height:2px;
-  background:white;
-  border-radius:50%;
-  animation:twinkle 3s infinite;
-}
-
-@keyframes twinkle {
-  0%,100%{opacity:.3}
-  50%{opacity:1}
+  width:2px;height:2px;
+  background:white;border-radius:50%;
+  opacity:.5;
 }
 
 .title {
   position:fixed;
-  top:20px;
-  left:50%;
+  top:20px; left:50%;
   transform:translateX(-50%);
-  color:white;
-  font-size:12px;
+  color:white; font-size:12px;
   font-weight:bold;
   z-index:10;
-  text-shadow:2px 2px 8px rgba(0,0,0,.3);
-  pointer-events:none;
-  
 }
 
-.container {
-  position:absolute;
-  inset:0;
-  overflow:hidden;
-  z-index:1;
-}
+.container { position:absolute; inset:0; z-index:1; }
 
-/* зона полёта */
 .flight-zone {
   position:absolute;
-  left:0;
-  right:0;
-  top:0;          /* 👈 теперь включает зону заголовка */
+  left:0; right:0; top:0;
   overflow:hidden;
 }
 
@@ -73,43 +47,25 @@ body {
   background:rgba(255,255,255,.95);
   border-radius:10px;
   box-shadow:0 10px 30px rgba(0,0,0,.3);
-  font-size: 10px;
+  font-size:10px;
+  will-change: transform;
 }
 
 .wish-emoji {
   position:absolute;
-  top:-7px;
-  right:-10px;
+  top:-7px; right:-10px;
   font-size:16px;
-  animation:bounce 2s infinite;
 }
 
-@keyframes bounce {
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-4px)}
-}
-
-.wish-text {
-  line-height:1.4;
-  margin-bottom:6px;
-}
-
-.wish-author {
-  font-size:11px;
-  color:#555;
-  text-align:right;
-  font-style:italic;
-}
+.wish-text { line-height:1.4; margin-bottom:6px; }
+.wish-author { font-size:11px; color:#555; text-align:right; }
 
 .input-container {
   position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
+  left:0; right:0; bottom:0;
   padding:16px 24px;
   backdrop-filter:blur(20px);
   background:rgba(255,255,255,.15);
-  border-top:1px solid rgba(255,255,255,.3);
   z-index:20;
 }
 
@@ -126,23 +82,18 @@ input, textarea {
   padding:12px;
   border:none;
   border-radius:14px;
-  font-size:14px;
 }
 
-textarea {
-  flex-basis:100%;
-  resize:none;
-}
+textarea { flex-basis:100%; resize:none; }
 
 button {
-  padding:12px 34px;
-  width: 100%;
+  width:100%;
+  padding:12px;
   border:none;
   border-radius:14px;
   background:linear-gradient(135deg,#f093fb,#f5576c);
   color:white;
   font-weight:bold;
-  cursor:pointer;
 }
 
 .logo {
@@ -155,7 +106,6 @@ button {
   width: 100px;
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/bad-words@3.0.4/lib/badwords.min.js"></script>
 </head>
 <body>
 <div class="logo">
@@ -178,88 +128,97 @@ button {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyC_iRQRECuIMxVbcZxSqAOfVaR4EasniSQ",
   authDomain: "well-67432.firebaseapp.com",
   projectId: "well-67432"
 });
-
 const db = getFirestore(app);
 
 // ⭐ фон
 const stars = document.getElementById("stars");
-for(let i=0;i<100;i++){
+for(let i=0;i<80;i++){
   const s=document.createElement("div");
   s.className="star";
   s.style.left=Math.random()*100+"%";
   s.style.top=Math.random()*100+"%";
-  s.style.animationDelay=Math.random()*3+"s";
   stars.appendChild(s);
 }
 
 const zone = document.getElementById("flightZone");
 const inputBar = document.getElementById("inputBar");
 
-function updateZone() {
-  const bottom = inputBar.offsetHeight;
-  zone.style.bottom = bottom + "px";
+function updateZone(){
+  zone.style.bottom = inputBar.offsetHeight + "px";
 }
-
 updateZone();
-window.addEventListener("resize", updateZone);
+addEventListener("resize", updateZone);
 
-// эмодзи
+// 🎈
 const emojis = ['🎈','🎉','✨','🌟','🎁','💝','🎂','🎊','🌈','💫'];
 
-// Firebase
-const q = query(collection(db,"messages"), orderBy("timestamp"));
-onSnapshot(q,snap=>{
-  zone.innerHTML="";
-  snap.forEach(d=>createCard(d.data()));
+const cards = new Map();
+const MAX_CARDS = 120;
+
+// Firebase (инкрементально)
+const q = query(
+  collection(db,"messages"),
+  orderBy("timestamp"),
+  limit(MAX_CARDS)
+);
+
+onSnapshot(q, snap => {
+  snap.docChanges().forEach(change => {
+    if(change.type === "added"){
+      addCard(change.doc.id, change.doc.data());
+    }
+  });
 });
 
-function createCard(data){
-  const card=document.createElement("div");
-  card.className="wish-card";
+function addCard(id, data){
+  if(cards.size >= MAX_CARDS){
+    const [oldest] = cards.keys();
+    cards.get(oldest).el.remove();
+    cards.delete(oldest);
+  }
 
-  const emoji = emojis[Math.floor(Math.random()*emojis.length)];
-
-  card.innerHTML=`
-    <div class="wish-emoji">${emoji}</div>
+  const el = document.createElement("div");
+  el.className = "wish-card";
+  el.innerHTML = `
+    <div class="wish-emoji">${emojis[Math.random()*emojis.length|0]}</div>
     <div class="wish-text">${data.text}</div>
-    <div class="wish-author">— ${data.author||"Аноним"}</div>
+    <div class="wish-author">— ${data.author || "Аноним"}</div>
   `;
 
-  zone.appendChild(card);
-  animate(card);
-}
+  zone.appendChild(el);
 
-function animate(card){
   const rect = zone.getBoundingClientRect();
-  const w = card.offsetWidth;
-  const h = card.offsetHeight;
+  const card = {
+    el,
+    x: Math.random()*(rect.width-260),
+    y: Math.random()*(rect.height-120),
+    ax: 10+Math.random()*20,
+    ay: 6+Math.random()*12,
+    speed: 0.0003+Math.random()*0.0005
+  };
 
-  const baseX = Math.random()*(rect.width-w);
-  const baseY = Math.random()*(rect.height-h);
-
-  const ax = 15 + Math.random()*20;
-  const ay = 8 + Math.random()*12;
-  const speed = 0.00025 + Math.random()*0.00015;
-
-  function frame(t){
-    const x = baseX + Math.sin(t*speed)*ax;
-    const y = baseY + Math.cos(t*speed)*ay;
-    card.style.transform = `translate(${x}px,${y}px)`;
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
+  cards.set(id, card);
 }
 
-// ======================= Фильтр матерных слов =======================
+// 🔁 один animation loop
+function animate(t){
+  cards.forEach(c=>{
+    const x = c.x + Math.sin(t*c.speed)*c.ax;
+    const y = c.y + Math.cos(t*c.speed)*c.ay;
+    c.el.style.transform = `translate3d(${x}px,${y}px,0)`;
+  });
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
 
-// список русских матерных слов
+// ================== ФИЛЬТР МАТА ==================
 const russianBadWords = [
   "сука","блять","хуй","пизда","ебать","ёб","мудак","гандон","залуп","нахуй",
   "шлюха","путана","проститутка","шалава","блядь","блядина","блядоёбина","выблядок",
@@ -306,46 +265,36 @@ const russianBadWords = [
   "shalavashka","shlyushechka","mudachishka","huevy","huevenky","huevy","ohuevshiy","zaebisty"
 ];
 
-// функция нормализации текста для фильтра
-function normalizeText(text) {
-  let normalized = text.toLowerCase();
-
-  // убираем все пробелы и спецсимволы
-  normalized = normalized.replace(/\s+/g, "").replace(/[^a-zа-яё]/gi, "");
-
-  // замена латинских букв на кириллицу (чтобы ловить "бlять", "пizдa")
-  const map = { "a":"а", "e":"е", "i":"и", "o":"о", "u":"у", "y":"у", "l":"л" };
-  normalized = normalized.split("").map(ch => map[ch] || ch).join("");
-
-  return normalized;
+function normalizeText(text){
+  return text.toLowerCase()
+    .replace(/\s+/g,"")
+    .replace(/[^a-zа-яё]/gi,"")
+    .replace(/[aeiouyl]/g,c=>({a:"а",e:"е",i:"и",o:"о",u:"у",y:"у",l:"л"}[c]||c));
 }
 
-// функция проверки текста на мат
-function containsBadWords(text) {
-  const normalized = normalizeText(text);
-  return russianBadWords.some(word => normalized.includes(word));
+function containsBadWords(text){
+  const n = normalizeText(text);
+  return russianBadWords.some(w=>n.includes(w));
 }
 
-// отправка сообщений
-sendBtn.onclick = async () => {
+sendBtn.onclick = async ()=>{
   const text = wishInput.value.trim();
   if(!text) return;
 
   const author = nameInput.value.trim();
-
-  if (containsBadWords(text) || containsBadWords(author)) {
-    alert("Сообщение содержит запрещённые слова и не может быть отправлено.");
+  if(containsBadWords(text) || containsBadWords(author)){
+    alert("Сообщение содержит запрещённые слова");
     return;
   }
 
-  await addDoc(collection(db, "messages"), {
+  await addDoc(collection(db,"messages"),{
     text,
     author: author || "Аноним",
     timestamp: new Date()
   });
 
-  wishInput.value = "";
-  nameInput.value = "";
+  wishInput.value="";
+  nameInput.value="";
 };
 </script>
 </body>
